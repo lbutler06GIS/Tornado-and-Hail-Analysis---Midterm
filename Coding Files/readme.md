@@ -20,6 +20,10 @@ Datasets:
     a.	Records containing hail locations, dates, sizes.
     b.	https://www.spc.noaa.gov/wcm/
 
+3. Instructions on how to read the .csv from NOAA
+    a. https://www.spc.noaa.gov/wcm/data/SPC_severe_database_description.pdf
+    
+    
     I trimmed these datasets down considerably. The data available is quite robust. I also realized as
     my hail datasets look like a glitter disaster, that it's all hail, not just hail produced with 
     a tornado. So, if I had more time, I could have edited the .csv in a way that removed hail
