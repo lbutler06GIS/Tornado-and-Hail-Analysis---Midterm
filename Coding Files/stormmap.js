@@ -29,7 +29,7 @@ var tornadoLayer;
       style: function(feature) {
         return {
           color: 'black',
-          weight: 2,
+          weight: 4,
           opacity: 0.8
         };
       },
