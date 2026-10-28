@@ -1,19 +1,26 @@
 var map = L.map('stormmap').setView([38, -95], 4);
 var basemapUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}';
 var basemap =  L.tileLayer(basemapUrl, {attribution: 'Tiles &copy; Esri &mdash; Source: US National Park Service', maxZoom: 8}).addTo(map);
+var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '&copy; OpenStreetMap contributors'});
+
 
 
 //Toggle Control using Leaflet <https://leafletjs.com/examples/layers-control/>
 
-var layerControl = L.control.layers(null, {}, {
+var baseMaps = {
+  "Esri World Physical": basemap,
+  "Open Street Map": osm
+};
+
+var layerControl = L.control.layers(baseMaps, {}, {
+  
   collapsed: false
 }).addTo(map);
       
 //Add hail and tornado layers
-
-
 //Tornado layer
 var tornadoData = 'tornadoes.geojson';
+var tornadoLayer;
 
   $.getJSON(tornadoData, function(data) {
     console.log("Tornado data loaded:", data);
@@ -33,12 +40,12 @@ var tornadoData = 'tornadoes.geojson';
               '<strong>Tornado Report</strong><br>' +
               'State: ' + feature.properties.state + '<br>' +
               'Date: ' + feature.properties.date + '<br>' +
-              'Time: ' + feature.properties.date + '<br>' +
+              'Time: ' + feature.properties.time + '<br>' +
               'EF Rating: ' + feature.properties.efscale + '<br>' +
               'Path Length (miles): ' + feature.properties.lengthMiles + '<br>' +
               'Tornado Width (yards): ' + feature.properties.widthYards + '<br>' +
-              'Property Damage Costs: ' + feature.properties.propertyDamage + '<br>' +
-              'Crop Damage Costs: ' + feature.properties.cropDamage + '<br>' +
+              'Property Damage ($): ' + feature.properties.propertyDamage + '<br>' +
+              'Crop Damage ($): ' + feature.properties.cropDamage + '<br>' +
               'Injuries: ' + feature.properties.injuries + '<br>' +
               'Fatalities: ' + feature.properties.fatalities + '<br>'
              );
@@ -53,9 +60,11 @@ var tornadoData = 'tornadoes.geojson';
 
   //Hail layer
 var hailData = 'hail.geojson';
+var hailLayer;
+
 $.getJSON(hailData, function (data) {
   console.log("Hail data loaded:", data);
-  L.geoJSON(data, {
+  hailLayer = L.geoJSON(data, {
     pointToLayer: function (feature, latlng) {
 
       var hailSize = Number(feature.properties.hailSize);
@@ -65,91 +74,60 @@ $.getJSON(hailData, function (data) {
       if (hailSize >= 3) markerColor = 'red';
       if (hailSize >= 4) markerColor = 'blue';
       if (hailSize >= 5) markerColor = 'purple';
+    
 
 
       return L.circleMarker(latlng, {
-        radius: hailSize * 2,
+        radius: hailSize * 1,
         color: markerColor,
         fillColor: markerColor,
         fillOpacity: 0.35,
         weight: 1
-      });
+    
+  });
+},
 
-    }
+      //next code line is for the popup requirement - code copied and parts edited from instructor, assignment 4.
+      
+      
+      onEachFeature: function(feature, layer) {
+             layer.bindPopup(
+              '<strong>Hail Report</strong><br>' +
+              'State: ' + feature.properties.state + '<br>' +
+              'Date: ' + feature.properties.date + '<br>' +
+              'Time: ' + feature.properties.time + '<br>' +
+              'Hail Size (diameter/inches): ' + feature.properties.hailSize + '<br>' +
+              'Property Damages ($): ' + feature.properties.propertyDamage + '<br>' +
+              'Crop Damages ($): ' + feature.properties.cropDamage + '<br>' 
+              
+  )}
   }).addTo(map)
+
+  //to link to toggle
+  layerControl.addOverlay(hailLayer, "Hail");
   });
 
 
 
 //Legend
-            //copied code from leaflet assign 4
+//copied code from leaflet assign 4 and adapted. Like everything else.
 const legend = L.control({position: 'bottomright'});
         legend.onAdd = function(map) {
                 const div = L.DomUtil.create('div', 'info legend');
                 div.innerHTML += '<strong>Legend</strong><br>';
                 div.innerHTML += '<br><strong>Hail Size in inches</strong><br>'
-                const colors = ['hotpink', 'orange', 'red', 'blue', 'purple'];
-                const labels = ['Less than 1', '2-3', '3-4', '5+'];
+                const colors = ['green', 'hotpink', 'orange', 'red', 'blue', 'purple'];
+                const labels = ['Less than 1', '1-2', '2-3', '3-4', '4-5', '5 or greater'];
                 for (let i = 0; i < colors.length; i++) {
 
                     div.innerHTML += '<i style="background:' + colors[i] + '"></i> ' + labels[i] + '<br>';
                 }
 
-                /*//adding code for weather alerts in legend
-                div.innerHTML += '<br><strong>Weather Alert Severity</strong><br>'
-                div.innerHTML += '<i style="background:purple"></i> Extreme<br>';
-                div.innerHTML += '<i style="background:red"></i> Severe<br>';
-                div.innerHTML += '<i style="background:orange"></i> Moderate<br>';
-                div.innerHTML += '<i style="background: #e70c7a"></i> Minor<br>';
+                div.innerHTML += '<br><strong>Tornado Paths</strong><br>';
+                div.innerHTML += '<i style="background:black;"></i> Tornado paths<br>';
+
                 return div;
-        }; */
+              };
 
         legend.addTo(map);
-
-
-
-/*var usgsEarthquakeData = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson';
-    $.getJSON(usgsEarthquakeData, function(data) {
-        L.geoJSON(data, {
-        pointToLayer: function(feature, latlng) {
-            //magnitude was from the usgs provided link and that doc is broken into the individual details for each earthquake
-            var magnitude = feature.properties.mag;
-            var markerColor = 'green';
-            if (magnitude >=2) markerColor = 'yellow';
-            if (magnitude >=4) markerColor = 'orange';
-            if (magnitude >=6) markerColor = 'red';
-            return L.circleMarker(latlng, {
-                radius: magnitude * 3,
-                color: markerColor
-        });
-    },
-        //next code line is for the popup requirement - code copied and some edited from instructor provided to include different information
-        onEachFeature: function(feature, layer) {
-            var magnitude = feature.properties.mag;
-            var location = feature.properties.place;
-            var time = new Date(feature.properties.time).toLocaleString();
-            layer.bindPopup('magnitude: ' + magnitude + '<br>Location: ' + location + '<br>Time: ' + time);
-        }
-
-    }).addTo(map);
-    });
-
-    //code for creating a legend using Leaflet's interactive choropleth map tuturiol for legend creation & lots of google questions
-        const legend = L.control({position: 'bottomright'});
-        legend.onAdd = function(map) {
-                const div = L.DomUtil.create('div', 'info legend');
-                div.innerHTML += '<strong>Legend</strong><br>';
-                div.innerHTML += '<br><strong>Earthquake Magnitude</strong><br>'
-                const colors = ['green', 'yellow', 'orange', 'red'];
-                const labels = ['Less than 2', '2-3.9', '4-5.9', '6+'];
-                for (let i = 0; i < colors.length; i++) {
-                div.innerHTML +=    
-                '<i style="background:' + colors[i] + '"></i> ' + labels[i] + '<br>';
-                }
-                return div;
-        };
-
-        //put legend on the map code
-        legend.addTo(map);
-        */
 
