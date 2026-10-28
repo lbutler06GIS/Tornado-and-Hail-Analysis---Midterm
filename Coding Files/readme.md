@@ -13,15 +13,15 @@ see if hail size corresponds to tornado size.
 ### Datasets
 Datasets:
 1.	NOAA Historical Tornado Records
-    a.	Records containing tornado locations, dates, intensity ratings, and path information.
-    b.	https://www.spc.noaa.gov/wcm/
+    *	Records containing tornado locations, dates, intensity ratings, and path information.
+    *	https://www.spc.noaa.gov/wcm/
 
 2.	NOAA Historic Hail Records
-    a.	Records containing hail locations, dates, sizes.
-    b.	https://www.spc.noaa.gov/wcm/
+    *	Records containing hail locations, dates, sizes.
+    *	https://www.spc.noaa.gov/wcm/
 
 3. Instructions on how to read the .csv from NOAA
-    a. https://www.spc.noaa.gov/wcm/data/SPC_severe_database_description.pdf
+    * https://www.spc.noaa.gov/wcm/data/SPC_severe_database_description.pdf
     
     
     I trimmed these datasets down considerably. The data available is quite robust. I also realized as
